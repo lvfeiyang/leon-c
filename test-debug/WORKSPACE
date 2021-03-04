@@ -1,0 +1,10 @@
+new_local_repository(
+	name = "usr",
+	path = "/usr",
+	build_file = "third_party/usr.BUILD",
+)
+new_local_repository(
+	name = "fb",
+	path = "/var/lxj/wp/cpp/facebook/proxygen/proxygen/_build",
+	build_file = "third_party/fb.BUILD",
+)

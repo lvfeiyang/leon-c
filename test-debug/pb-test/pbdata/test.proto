@@ -1,0 +1,8 @@
+syntax = "proto3";
+package test;
+
+message TestPb {
+	string TableName = 9977;
+	string Sence = 1;
+	int32 Page = 2;
+}

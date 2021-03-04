@@ -1,0 +1,32 @@
+syntax = "proto3";
+option cc_enable_arenas=true;
+package ServMsg;
+
+message oneInfo {
+	uint64 key = 1;
+	bytes data = 2;
+}
+message PushReq {
+	repeated oneInfo infos = 1;
+}
+message PushRsp {
+	int32 errCode = 1;
+	string errDesc = 2;
+}
+
+message PullReq {
+	repeated uint64 keys = 1;
+	repeated uint32 field = 2;
+}
+message PullRsp {
+	int32 errCode = 1;
+	string errDesc = 2;
+	repeated bytes data = 3;
+}
+
+message DelCacheReq {
+	uint64 key = 1;
+}
+message DelCacheRsp {
+	bool succ = 1;
+}
