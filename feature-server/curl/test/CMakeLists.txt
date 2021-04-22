@@ -14,7 +14,7 @@ find_library(gtest_path libgtest.a)
 find_library(gtest_main_path libgtest_main.a)
 find_package(Protobuf REQUIRED)
 
-add_executable(fs-test ../CurlClient.cpp CurlClientTest.cpp ../../util/pbdata/serv-msg.pb.cc)
+add_executable(fs-test ../CurlClient.cpp CurlClientTest.cpp ../../util/pbdata/serv-msg.pb.cc ../HttpCli.cpp)
 target_link_libraries(
 	fs-test PUBLIC ${gtest_path} ${gtest_main_path} ${Protobuf_LIBRARIES}
 	proxygen::proxygen

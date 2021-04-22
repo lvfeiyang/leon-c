@@ -46,7 +46,7 @@ struct TableStruct_serv_2dmsg_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[5]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[7]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -54,6 +54,12 @@ struct TableStruct_serv_2dmsg_2eproto {
 };
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_serv_2dmsg_2eproto;
 namespace ServMsg {
+class DelCacheReq;
+class DelCacheReqDefaultTypeInternal;
+extern DelCacheReqDefaultTypeInternal _DelCacheReq_default_instance_;
+class DelCacheRsp;
+class DelCacheRspDefaultTypeInternal;
+extern DelCacheRspDefaultTypeInternal _DelCacheRsp_default_instance_;
 class PullReq;
 class PullReqDefaultTypeInternal;
 extern PullReqDefaultTypeInternal _PullReq_default_instance_;
@@ -71,6 +77,8 @@ class oneInfoDefaultTypeInternal;
 extern oneInfoDefaultTypeInternal _oneInfo_default_instance_;
 }  // namespace ServMsg
 PROTOBUF_NAMESPACE_OPEN
+template<> ::ServMsg::DelCacheReq* Arena::CreateMaybeMessage<::ServMsg::DelCacheReq>(Arena*);
+template<> ::ServMsg::DelCacheRsp* Arena::CreateMaybeMessage<::ServMsg::DelCacheRsp>(Arena*);
 template<> ::ServMsg::PullReq* Arena::CreateMaybeMessage<::ServMsg::PullReq>(Arena*);
 template<> ::ServMsg::PullRsp* Arena::CreateMaybeMessage<::ServMsg::PullRsp>(Arena*);
 template<> ::ServMsg::PushReq* Arena::CreateMaybeMessage<::ServMsg::PushReq>(Arena*);
@@ -887,6 +895,278 @@ class PullRsp PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_serv_2dmsg_2eproto;
 };
+// -------------------------------------------------------------------
+
+class DelCacheReq PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:ServMsg.DelCacheReq) */ {
+ public:
+  inline DelCacheReq() : DelCacheReq(nullptr) {}
+  virtual ~DelCacheReq();
+
+  DelCacheReq(const DelCacheReq& from);
+  DelCacheReq(DelCacheReq&& from) noexcept
+    : DelCacheReq() {
+    *this = ::std::move(from);
+  }
+
+  inline DelCacheReq& operator=(const DelCacheReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DelCacheReq& operator=(DelCacheReq&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DelCacheReq& default_instance();
+
+  static inline const DelCacheReq* internal_default_instance() {
+    return reinterpret_cast<const DelCacheReq*>(
+               &_DelCacheReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(DelCacheReq& a, DelCacheReq& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DelCacheReq* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DelCacheReq* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DelCacheReq* New() const final {
+    return CreateMaybeMessage<DelCacheReq>(nullptr);
+  }
+
+  DelCacheReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DelCacheReq>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DelCacheReq& from);
+  void MergeFrom(const DelCacheReq& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DelCacheReq* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "ServMsg.DelCacheReq";
+  }
+  protected:
+  explicit DelCacheReq(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_serv_2dmsg_2eproto);
+    return ::descriptor_table_serv_2dmsg_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kKeyFieldNumber = 1,
+  };
+  // uint64 key = 1;
+  void clear_key();
+  ::PROTOBUF_NAMESPACE_ID::uint64 key() const;
+  void set_key(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_key() const;
+  void _internal_set_key(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:ServMsg.DelCacheReq)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 key_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_serv_2dmsg_2eproto;
+};
+// -------------------------------------------------------------------
+
+class DelCacheRsp PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:ServMsg.DelCacheRsp) */ {
+ public:
+  inline DelCacheRsp() : DelCacheRsp(nullptr) {}
+  virtual ~DelCacheRsp();
+
+  DelCacheRsp(const DelCacheRsp& from);
+  DelCacheRsp(DelCacheRsp&& from) noexcept
+    : DelCacheRsp() {
+    *this = ::std::move(from);
+  }
+
+  inline DelCacheRsp& operator=(const DelCacheRsp& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DelCacheRsp& operator=(DelCacheRsp&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DelCacheRsp& default_instance();
+
+  static inline const DelCacheRsp* internal_default_instance() {
+    return reinterpret_cast<const DelCacheRsp*>(
+               &_DelCacheRsp_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(DelCacheRsp& a, DelCacheRsp& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DelCacheRsp* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DelCacheRsp* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DelCacheRsp* New() const final {
+    return CreateMaybeMessage<DelCacheRsp>(nullptr);
+  }
+
+  DelCacheRsp* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DelCacheRsp>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DelCacheRsp& from);
+  void MergeFrom(const DelCacheRsp& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DelCacheRsp* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "ServMsg.DelCacheRsp";
+  }
+  protected:
+  explicit DelCacheRsp(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_serv_2dmsg_2eproto);
+    return ::descriptor_table_serv_2dmsg_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSuccFieldNumber = 1,
+  };
+  // bool succ = 1;
+  void clear_succ();
+  bool succ() const;
+  void set_succ(bool value);
+  private:
+  bool _internal_succ() const;
+  void _internal_set_succ(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:ServMsg.DelCacheRsp)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  bool succ_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_serv_2dmsg_2eproto;
+};
 // ===================================================================
 
 
@@ -1364,9 +1644,61 @@ PullRsp::mutable_data() {
   return &data_;
 }
 
+// -------------------------------------------------------------------
+
+// DelCacheReq
+
+// uint64 key = 1;
+inline void DelCacheReq::clear_key() {
+  key_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 DelCacheReq::_internal_key() const {
+  return key_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 DelCacheReq::key() const {
+  // @@protoc_insertion_point(field_get:ServMsg.DelCacheReq.key)
+  return _internal_key();
+}
+inline void DelCacheReq::_internal_set_key(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  key_ = value;
+}
+inline void DelCacheReq::set_key(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_key(value);
+  // @@protoc_insertion_point(field_set:ServMsg.DelCacheReq.key)
+}
+
+// -------------------------------------------------------------------
+
+// DelCacheRsp
+
+// bool succ = 1;
+inline void DelCacheRsp::clear_succ() {
+  succ_ = false;
+}
+inline bool DelCacheRsp::_internal_succ() const {
+  return succ_;
+}
+inline bool DelCacheRsp::succ() const {
+  // @@protoc_insertion_point(field_get:ServMsg.DelCacheRsp.succ)
+  return _internal_succ();
+}
+inline void DelCacheRsp::_internal_set_succ(bool value) {
+  
+  succ_ = value;
+}
+inline void DelCacheRsp::set_succ(bool value) {
+  _internal_set_succ(value);
+  // @@protoc_insertion_point(field_set:ServMsg.DelCacheRsp.succ)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -10,19 +10,21 @@ namespace FsService {
 
 class InOutMsg {
  public:
-  enum class MsgType { Push, Pull, DelCache };
-  explicit InOutMsg(size_t len, const uint8_t* d, MsgType t);
-  ~InOutMsg();
-  folly::fbstring show();
-  folly::fbvector<uint64_t> getPullIds();
-  void setPullData(size_t i, folly::fbstring d);
-  std::string EncodeRsp(int32_t errcode);
-
- private:
+  enum class MsgType { Push, Pull, DelCache, Unknow };
   struct DataInfo {
     uint64_t id;
     folly::fbstring d;
   };
+  explicit InOutMsg(size_t len, const uint8_t* d, MsgType t);
+  ~InOutMsg();
+
+  folly::fbstring show();
+  folly::fbvector<uint64_t> getPullIds();
+  folly::fbvector<DataInfo>& getInfos();
+  void setPullData(size_t i, folly::fbstring d);
+  std::string EncodeRsp(int32_t errcode);
+
+ private:
   folly::fbvector<DataInfo> infos_;
   folly::F14FastSet<uint64_t> fields_;
   MsgType t_;

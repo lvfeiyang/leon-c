@@ -53,7 +53,8 @@ InOutMsg::InOutMsg(size_t len, const uint8_t* d, MsgType t) {
       // ServMsg::oneInfo onei;
       for (size_t i = 0; i < num; i++) {
         auto onei = req.infos(i);
-        this->infos_.push_back(DataInfo{id : onei.key(), d : onei.data()});
+        this->infos_.push_back(InOutMsg::
+                               DataInfo{id : onei.key(), d : onei.data()});
       }
       break;
     }
@@ -63,12 +64,18 @@ InOutMsg::InOutMsg(size_t len, const uint8_t* d, MsgType t) {
       size_t num = req.keys_size();
       this->infos_.reserve(num);
       for (size_t i = 0; i < num; i++) {
-        this->infos_.push_back(DataInfo{id : req.keys(i)});
+        this->infos_.push_back(InOutMsg::DataInfo{id : req.keys(i)});
       }
       num = req.field_size();
       for (size_t i = 0; i < num; i++) {
         this->fields_.insert(req.field(i));
       }
+      break;
+    }
+    case MsgType::DelCache: {
+      ServMsg::DelCacheReq req;
+      req.ParseFromString(std::string((char*)d, len));
+      this->infos_.push_back(InOutMsg::DataInfo{id : req.key()});
       break;
     }
     default:
@@ -86,6 +93,9 @@ folly::fbstring InOutMsg::show() {
     ret += folly::to<folly::fbstring>(i) + ",";
   }
   return ret;
+}
+folly::fbvector<InOutMsg::DataInfo>& InOutMsg::getInfos() {
+  return this->infos_;
 }
 folly::fbvector<uint64_t> InOutMsg::getPullIds() {
   // folly::fbvector<uint64_t> ret(this->infos_.size());
@@ -116,6 +126,21 @@ std::string InOutMsg::EncodeRsp(int32_t errcode) {
         }
       }
       rsp.SerializeToString(&ret);
+      break;
+    }
+    case MsgType::Push: {
+      ServMsg::PushRsp rsp;
+      if (0 != errcode) {
+        rsp.set_errcode(errcode);
+      }
+      rsp.SerializeToString(&ret);
+      break;
+    }
+    case MsgType::DelCache: {
+      ServMsg::DelCacheRsp rsp;
+      if (0 == errcode) {
+        rsp.set_succ(true);
+      }
       break;
     }
 

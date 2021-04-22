@@ -60,16 +60,17 @@ class CurlClient : public proxygen::HTTPConnector::Callback,
   };
 
  public:
-  CurlClient(folly::EventBase* evb, proxygen::HTTPMethod httpMethod,
-             const proxygen::URL& url, const proxygen::URL* proxy,
-             const proxygen::HTTPHeaders& headers,
-             const std::string& inputFilename, bool h2c = false,
-             unsigned short httpMajor = 1, unsigned short httpMinor = 1,
-             bool partiallyReliable = false);
+  CurlClient(const std::string& urlPrefix, const proxygen::URL& url,
+             bool h2c = false, unsigned short httpMajor = 1,
+             unsigned short httpMinor = 1, bool partiallyReliable = false);
 
   virtual ~CurlClient() = default;
 
-  bool saveResponseToFile(const std::string& outputFilename);
+  void setSendMsg(std::string&& req);
+  void setRespMsg(std::string* rsp);
+  void setHeader(const proxygen::HTTPHeaders& headers);
+  void setMethod(proxygen::HTTPMethod httpMethod);
+  void setUrl(const std::string& url);
 
   static proxygen::HTTPHeaders parseHeaders(const std::string& headersString);
 
@@ -123,23 +124,21 @@ class CurlClient : public proxygen::HTTPConnector::Callback,
                         const std::string& tag = "");
 
   proxygen::HTTPTransaction* txn_{nullptr};
-  folly::EventBase* evb_{nullptr};
   proxygen::HTTPMethod httpMethod_;
+  std::string urlPrefix_;
   proxygen::URL url_;
-  std::unique_ptr<proxygen::URL> proxy_;
   proxygen::HTTPMessage request_;
-  const std::string inputFilename_;
   folly::SSLContextPtr sslContext_;
   int32_t recvWindow_{0};
-  bool loggingEnabled_{true};
+  bool loggingEnabled_{false};
   bool h2c_{false};
   unsigned short httpMajor_;
   unsigned short httpMinor_;
   bool egressPaused_{false};
-  std::unique_ptr<std::ifstream> inputFile_;
-  std::unique_ptr<std::ofstream> outputFile_;
-  std::unique_ptr<std::ostream> outputStream_;
   bool partiallyReliable_{false};
+
+  std::string inputStr_;
+  std::string* outputStr_;
 
   std::unique_ptr<proxygen::HTTPMessage> response_;
   std::vector<std::unique_ptr<CurlPushHandler>> pushTxnHandlers_;

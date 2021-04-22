@@ -28,52 +28,15 @@ DECLARE_int32(recv_window);
 
 namespace CurlService {
 
-CurlClient::CurlClient(EventBase* evb, HTTPMethod httpMethod, const URL& url,
-                       const proxygen::URL* proxy, const HTTPHeaders& headers,
-                       const string& inputFilename, bool h2c,
-                       unsigned short httpMajor, unsigned short httpMinor,
-                       bool partiallyReliable)
-    : evb_(evb),
-      httpMethod_(httpMethod),
-      url_(url),
-      inputFilename_(inputFilename),
+CurlClient::CurlClient(const std::string& urlPrefix, const proxygen::URL& url,
+                       bool h2c, unsigned short httpMajor,
+                       unsigned short httpMinor, bool partiallyReliable)
+    : urlPrefix_(urlPrefix),
       h2c_(h2c),
       httpMajor_(httpMajor),
       httpMinor_(httpMinor),
-      partiallyReliable_(partiallyReliable) {
-  if (proxy != nullptr) {
-    proxy_ = std::make_unique<URL>(proxy->getUrl());
-  }
-
-  outputStream_ = std::make_unique<std::ostream>(std::cout.rdbuf());
-  headers.forEach([this](const string& header, const string& val) {
-    request_.getHeaders().add(header, val);
-  });
-}
-
-bool CurlClient::saveResponseToFile(const std::string& outputFilename) {
-  std::streambuf* buf;
-  if (outputFilename.empty()) {
-    return false;
-  }
-  uint16_t tries = 0;
-  while (tries < std::numeric_limits<uint16_t>::max()) {
-    std::string suffix = (tries == 0) ? "" : folly::to<std::string>("_", tries);
-    auto filename = folly::to<std::string>(outputFilename, suffix);
-    struct stat statBuf;
-    if (stat(filename.c_str(), &statBuf) == -1) {
-      outputFile_ =
-          std::make_unique<ofstream>(filename, ios::out | ios::binary);
-      if (*outputFile_ && outputFile_->good()) {
-        buf = outputFile_->rdbuf();
-        outputStream_ = std::make_unique<std::ostream>(buf);
-        return true;
-      }
-    }
-    tries++;
-  }
-  return false;
-}
+      partiallyReliable_(partiallyReliable),
+      url_(url) {}
 
 HTTPHeaders CurlClient::parseHeaders(const std::string& headersString) {
   vector<StringPiece> headersList;
@@ -153,11 +116,7 @@ void CurlClient::connectSuccess(HTTPUpstreamSession* session) {
 void CurlClient::setupHeaders() {
   request_.setMethod(httpMethod_);
   request_.setHTTPVersion(httpMajor_, httpMinor_);
-  if (proxy_) {
-    request_.setURL(url_.getUrl());
-  } else {
-    request_.setURL(url_.makeRelativeURL());
-  }
+  request_.setURL(url_.makeRelativeURL());
   request_.setSecure(url_.isSecure());
   if (h2c_) {
     HTTP2Codec::requestUpgrade(request_);
@@ -186,33 +145,32 @@ void CurlClient::sendRequest(HTTPTransaction* txn) {
   setupHeaders();
   txn_->sendHeaders(request_);
 
-  if (httpMethod_ == HTTPMethod::POST) {
-    inputFile_ =
-        std::make_unique<ifstream>(inputFilename_, ios::in | ios::binary);
-    sendBodyFromFile();
+  if (HTTPMethod::POST == httpMethod_ || httpMethod_ == HTTPMethod::PUT) {
+    if (inputStr_.size() != 0) {
+      if (!egressPaused_) {
+        unique_ptr<folly::IOBuf> buf(
+            folly::IOBuf::wrapBuffer(inputStr_.data(), inputStr_.size()));
+        txn_->sendBody(move(buf));
+        txn_->sendEOM();
+      }
+    }
   } else {
     txn_->sendEOM();
   }
 }
 
-void CurlClient::sendBodyFromFile() {
-  const uint16_t kReadSize = 4096;
-  CHECK(inputFile_);
-  // Reading from the file by chunks
-  // Important note: It's pretty bad to call a blocking i/o function like
-  // ifstream::read() in an eventloop - but for the sake of this simple
-  // example, we'll do it.
-  // An alternative would be to put this into some folly::AsyncReader
-  // object.
-  while (inputFile_->good() && !egressPaused_) {
-    unique_ptr<IOBuf> buf = IOBuf::createCombined(kReadSize);
-    inputFile_->read((char*)buf->writableData(), kReadSize);
-    buf->append(inputFile_->gcount());
-    txn_->sendBody(move(buf));
-  }
-  if (!egressPaused_) {
-    txn_->sendEOM();
-  }
+void CurlClient::setSendMsg(std::string&& req) { inputStr_ = req; }
+void CurlClient::setRespMsg(std::string* rsp) { outputStr_ = rsp; }
+void CurlClient::setHeader(const proxygen::HTTPHeaders& headers) {
+  headers.forEach([this](const string& header, const string& val) {
+    request_.getHeaders().add(header, val);
+  });
+}
+void CurlClient::setMethod(proxygen::HTTPMethod httpMethod) {
+  httpMethod_ = httpMethod;
+}
+void CurlClient::setUrl(const std::string& url) {
+  url_ = proxygen::URL(urlPrefix_ + url);
 }
 
 void CurlClient::printMessageImpl(proxygen::HTTPMessage* msg,
@@ -239,18 +197,15 @@ void CurlClient::onHeadersComplete(unique_ptr<HTTPMessage> msg) noexcept {
 }
 
 void CurlClient::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
-  if (!loggingEnabled_) {
-    return;
-  }
-  CHECK(outputStream_);
+  CHECK(outputStr_);
   if (chain) {
     const IOBuf* p = chain.get();
     do {
-      outputStream_->write((const char*)p->data(), p->length());
-      outputStream_->flush();
+      outputStr_->append((const char*)p->data(), p->length());
       p = p->next();
     } while (p != chain.get());
   }
+  return;
 }
 
 void CurlClient::onTrailers(std::unique_ptr<HTTPHeaders>) noexcept {
@@ -280,8 +235,11 @@ void CurlClient::onEgressPaused() noexcept {
 void CurlClient::onEgressResumed() noexcept {
   LOG_IF(INFO, loggingEnabled_) << "Egress resumed";
   egressPaused_ = false;
-  if (inputFile_) {
-    sendBodyFromFile();
+  if (inputStr_.size() != 0) {
+    unique_ptr<folly::IOBuf> buf(
+        folly::IOBuf::wrapBuffer(inputStr_.data(), inputStr_.size()));
+    txn_->sendBody(move(buf));
+    txn_->sendEOM();
   }
 }
 

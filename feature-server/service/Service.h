@@ -2,6 +2,8 @@
 
 #include <proxygen/httpserver/RequestHandlerFactory.h>
 
+#include "Msg.h"
+
 namespace FsService {
 
 class FsHandlerFactory : public proxygen::RequestHandlerFactory {
@@ -16,6 +18,8 @@ class FsHandlerFactory : public proxygen::RequestHandlerFactory {
 
 class FsHandler : public proxygen::RequestHandler {
  public:
+  explicit FsHandler(InOutMsg::MsgType t);
+
   void onRequest(
       std::unique_ptr<proxygen::HTTPMessage> headers) noexcept override;
 
@@ -28,6 +32,9 @@ class FsHandler : public proxygen::RequestHandler {
   void requestComplete() noexcept override;
 
   void onError(proxygen::ProxygenError err) noexcept override;
+
+ private:
+  InOutMsg::MsgType reqType_;
 };
 
 }  // namespace FsService
