@@ -10,13 +10,7 @@ DEFINE_int32(threads, 0,
              "Number of threads to listen on. Numbers <= 0 "
              "will use the number of cores on this machine.");
 
-int main(int argc, char *argv[]) {
-  std::cout << "hello leon" << std::endl;
-
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
-  google::InitGoogleLogging(argv[0]);
-  google::InstallFailureSignalHandler();
-
+void httpser() {
   std::vector<proxygen::HTTPServer::IPConfig> IPs = {
       {folly::SocketAddress(FLAGS_ip, FLAGS_http_port, true),
        proxygen::HTTPServer::Protocol::HTTP},
@@ -43,8 +37,37 @@ int main(int argc, char *argv[]) {
 
   // Start HTTPServer mainloop in a separate thread
   std::thread t([&]() { server.start(); });
-
   t.join();
+
+  return;
+}
+
+void grpcser() {
+  std::string server_address(FLAGS_ip);  //"0.0.0.0:50051");
+  GreeterServiceImpl service;
+
+  grpc::EnableDefaultHealthCheckService(true);
+  grpc::reflection::InitProtoReflectionServerBuilderPlugin();
+  grpc::ServerBuilder builder;
+
+  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials(),
+                           FLAGS_http_port);
+  builder.RegisterService(&service);
+
+  std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+  std::cout << "Server listening on " << server_address << std::endl;
+
+  server->Wait();
+}
+
+int main(int argc, char *argv[]) {
+  std::cout << "hello leon" << std::endl;
+
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  google::InitGoogleLogging(argv[0]);
+  google::InstallFailureSignalHandler();
+
+  httpser();
 
   return 0;
 }

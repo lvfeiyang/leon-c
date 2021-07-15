@@ -1,5 +1,9 @@
 #include "curl/HttpCli.h"
 
+#include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/executors/GlobalExecutor.h>
+#include <folly/executors/IOThreadPoolExecutor.h>
+
 namespace HttpCli {
 CliManageFactory::CliManageFactory() : evb_(), cliMap_(16) {
   timer_ = std::move(folly::HHWheelTimer::newTimer(
@@ -52,21 +56,44 @@ CliManage::CliManage(std::string addrUrl, size_t num) {
   cliNum_ = num;
 }
 CliManage::~CliManage() {}
+std::thread testThread;
+folly::IOThreadPoolExecutor ioExe(1);
 void CliManage::send(std::string method, std::string url, std::string head,
-                     std::string req, std::string* rsp) {
+                     std::string req, std::string* rsp,
+                     folly::F14FastMap<std::string, std::string>& rspHead) {
   size_t index = std::rand() % cliNum_;
 
-  this->cliConns_[index]->client->setSendMsg(std::move(req));
-  this->cliConns_[index]->client->setRespMsg(rsp);
+  auto* oneIndex = this->cliConns_[index].get();
+  oneIndex->client->setSendMsg(std::move(req));
+  oneIndex->client->setRespMsg(rsp);
   proxygen::HTTPHeaders headers = CurlService::CurlClient::parseHeaders(head);
-  this->cliConns_[index]->client->setHeader(headers);
+  oneIndex->client->setHeader(headers);
   proxygen::HTTPMethod httpMethod = *proxygen::stringToMethod(method);
-  this->cliConns_[index]->client->setMethod(httpMethod);
-  if (url.size() > 0) this->cliConns_[index]->client->setUrl(url);
+  oneIndex->client->setMethod(httpMethod);
+  if (url.size() > 0) oneIndex->client->setUrl(url);
 
-  this->cliConns_[index]->connector->connect(
-      &this->cliConns_[index]->evb, *this->addr_,
-      std::chrono::milliseconds(1000), opts);
-  this->cliConns_[index]->evb.loop();
+  if (oneIndex->client->hasConnect()) {
+		CurlService::CurlClient::CurlPushHandler pushHandle(oneIndex->client.get());
+    proxygen::HTTPTransaction* pushedTxn = oneIndex->client->newExTransaction(&pushHandle);
+    // oneIndex->client->onPushedTransaction(pushedTxn);
+    oneIndex->client->sendRequest(pushedTxn);
+  } else {
+    // folly::ThreadedExecutor x; folly::getGlobalIOExecutor()
+    // folly::CPUThreadPoolExecutor ioExe(1);
+    ioExe.add([&]() {
+      // testThread = std::move(std::thread([&]() {
+      oneIndex->connector->connect(&oneIndex->evb, *this->addr_,
+                                   std::chrono::milliseconds(1000), opts);
+      LOG(INFO) << "leon_debug run in thread";
+      oneIndex->evb.loop();
+    });
+  }
+  LOG(INFO) << "leon_debug run thread";
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+  oneIndex->client->getResponse()->getHeaders().forEach(
+      [&rspHead](const std::string& header, const std::string& val) {
+        rspHead.insert(std::pair<std::string, std::string>(header, val));
+      });
 }
 }  // namespace HttpCli

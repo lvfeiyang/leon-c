@@ -110,7 +110,8 @@ void CurlClient::connectSuccess(HTTPUpstreamSession* session) {
 
   session->setFlowControl(recvWindow_, recvWindow_, recvWindow_);
   sendRequest(session->newTransaction(this));
-  session->closeWhenIdle();
+  // session->closeWhenIdle();
+	session_ = session;
 }
 
 void CurlClient::setupHeaders() {
@@ -141,8 +142,12 @@ void CurlClient::setupHeaders() {
 }
 
 void CurlClient::sendRequest(HTTPTransaction* txn) {
-  txn_ = txn;
+  if (txn != nullptr) txn_ = txn;
+  else
+	  txn_ = session_->newTransaction(this);
+    // txn_->reset(false, recvWindow_, recvWindow_, recvWindow_);
   setupHeaders();
+	LOG(INFO) << "leon_debug " << txn_;
   txn_->sendHeaders(request_);
 
   if (HTTPMethod::POST == httpMethod_ || httpMethod_ == HTTPMethod::PUT) {

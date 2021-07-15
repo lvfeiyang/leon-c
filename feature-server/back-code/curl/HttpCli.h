@@ -20,7 +20,8 @@ class CliManage {
   ~CliManage();
 
   void send(std::string method, std::string url, std::string head,
-            std::string req, std::string* rsp);
+            std::string req, std::string* rsp,
+            folly::F14FastMap<std::string, std::string>& rspHead);
 
  private:
   struct connResource {

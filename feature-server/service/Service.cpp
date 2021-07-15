@@ -34,12 +34,13 @@ void FsHandler::onRequest(std::unique_ptr<proxygen::HTTPMessage> req) noexcept {
   req->getHeaders().forEach([&](std::string& name, std::string& value) {
     builder.header(folly::to<std::string>("x-echo-", name), value);
   });
-  // LOG(INFO) << req->getMethodString() << req->getURL() << req->getPath()
-  //           << req->getQueryString();
+  LOG(INFO) << req->getMethodString() << req->getURL() << req->getPath()
+            << req->getQueryString();
   builder.send();
 }
 
 void FsHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
+  LOG(INFO) << "leon_debug get body";
   InOutMsg msg(body->length(), body->data(), this->reqType_);
 
   if (this->reqType_ == InOutMsg::MsgType::Unknow) {

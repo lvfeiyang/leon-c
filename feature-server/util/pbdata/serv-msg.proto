@@ -13,6 +13,9 @@ message PushRsp {
 	int32 errCode = 1;
 	string errDesc = 2;
 }
+service Pusher {
+	rpc Push (PushReq) returns (PushRsp) {}
+}
 
 message PullReq {
 	repeated uint64 keys = 1;
@@ -23,10 +26,16 @@ message PullRsp {
 	string errDesc = 2;
 	repeated bytes data = 3;
 }
+service Puller {
+	rpc Pull (PullReq) returns (PullRsp) {}
+}
 
 message DelCacheReq {
 	uint64 key = 1;
 }
 message DelCacheRsp {
 	bool succ = 1;
+}
+service DelCacheer {
+	rpc DelCache (DelCacheReq) returns (DelCacheRsp) {}
 }

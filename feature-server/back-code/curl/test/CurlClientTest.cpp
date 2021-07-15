@@ -18,11 +18,14 @@
 #include "util/pbdata/serv-msg.pb.h"
 
 TEST(module_curl, test_newcli) {
+  // folly::init(nullptr, nullptr);
+
   HttpCli::CliManageFactory::singleton().addCliManage(
       "leon_test", "http://127.0.0.1:11007", 2);
 
   std::string reqMsgData;
   std::string rspMsgData;
+  folly::F14FastMap<std::string, std::string> rspHead;
 
   ServMsg::PullReq req;
   req.add_keys(11);
@@ -33,12 +36,52 @@ TEST(module_curl, test_newcli) {
 
   HttpCli::CliManageFactory::singleton()
       .getClient("leon_test")
-      ->send("POST", "/pull", "", reqMsgData, &rspMsgData);
+      ->send("POST", "/pull", "", reqMsgData, &rspMsgData, rspHead);
 
   ServMsg::PullRsp rsp;
   rsp.ParseFromString(rspMsgData);
 
-  LOG(INFO) << "leon_debug  " << rsp.DebugString() << ";" << rspMsgData.size();
+  LOG(INFO) << "leon_debug " << rsp.DebugString() << ";" << rspMsgData.size();
+}
+
+TEST(module_consul, test_register) {
+  HttpCli::CliManageFactory::singleton().addCliManage(
+      "leon_consul", "http://registry-qa.qutoutiao.net", 1);
+
+  std::string reqMsgData;
+  std::string rspMsgData;
+  folly::F14FastMap<std::string, std::string> rspHead;
+
+  // folly::dynamic req = folly::dynamic::object("Name", "leon_fs_test")(
+  //     "ID", "leon_fs_test_1")("Tags", folly::dynamic::array("leon", "test"))(
+  //     "Address", "127.0.0.1")("Port", 9977)("EnableTagOverride", false)(
+  //     "Check",
+  //     folly::dynamic::object("DeregisterCriticalServiceAfter", "90m")(
+  //         "Interval", "10s")("Timeout", "5s")("HTTP",
+  //         "https://example.com"));
+  // reqMsgData = folly::toJson(req);
+  // LOG(INFO) << "leon_debug req " << reqMsgData;
+
+  HttpCli::CliManageFactory::singleton()
+      .getClient("leon_consul")
+      ->send("GET", "/v1/health/service/leon_fs_test",
+             "Content-Type=application/json", "", &rspMsgData, rspHead);
+
+  for (auto kv : rspHead) {
+    LOG(INFO) << kv.first << ": " << kv.second;
+  }
+  folly::dynamic rsp = folly::parseJson(rspMsgData);
+
+  LOG(INFO) << "leon_debug rsp " << rsp;
+
+  rspMsgData.clear();
+  rspHead.clear();
+  HttpCli::CliManageFactory::singleton()
+      .getClient("leon_consul")
+      ->send("GET", "/v1/health/service/leon_fs_test",
+             "Content-Type=application/json,X-Consul-Index=70814136", "",
+             &rspMsgData, rspHead);
+  LOG(INFO) << "leon_debug rsp 2 " << rsp;
 }
 
 /*TEST(module_curl, test_httpcli) {
@@ -204,3 +247,10 @@ TEST(module_curl, test_get) {
   rsp1.ParseFromString(rspMsgData1);
   LOG(INFO) << "leon_debug " << rsp1.DebugString();
 }*/
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  folly::init(&argc, &argv);
+
+  return RUN_ALL_TESTS();
+}

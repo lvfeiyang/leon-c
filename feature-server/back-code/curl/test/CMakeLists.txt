@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -g -ggdb")
 set(CMAKE_MODULE_PATH
 	"/home/lxj/proxygen/cmake"
 	"/home/lxj/proxygen/build/fbcode_builder/CMake"

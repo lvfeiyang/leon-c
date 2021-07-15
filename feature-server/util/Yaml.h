@@ -16,4 +16,7 @@ class YamlConf {
  private:
   YAML::Node yn;
 };
+
+extern YamlConf G_SerConf;
+
 }  // namespace Util

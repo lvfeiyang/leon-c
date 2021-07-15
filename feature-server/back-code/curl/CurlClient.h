@@ -115,6 +115,8 @@ class CurlClient : public proxygen::HTTPConnector::Callback,
 
   void setEOMFunc(std::function<void()> eomFunc) { eomFunc_ = eomFunc; }
 
+  bool hasConnect() { return txn_ != nullptr; }
+
  protected:
   void sendBodyFromFile();
 
@@ -124,6 +126,7 @@ class CurlClient : public proxygen::HTTPConnector::Callback,
                         const std::string& tag = "");
 
   proxygen::HTTPTransaction* txn_{nullptr};
+  proxygen::HTTPUpstreamSession* session_{nullptr};
   proxygen::HTTPMethod httpMethod_;
   std::string urlPrefix_;
   proxygen::URL url_;
